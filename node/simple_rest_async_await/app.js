@@ -10,23 +10,33 @@ function sleepAsync( timeout ) {
 }
 
 function readFileAsync( path, encoding ) {
-    return new Promise( resolve => {
-        fs.readFile( path, encoding, (err, data) => resolve( data ) );
+    return new Promise( (resolve, reject) => {
+        fs.readFile( path, encoding, (err, data) => err ? reject(err) : resolve( data ) );
     });
 }
 
 app.get("/list_users", async (req, res) => {
-    data = await readFileAsync( __dirname + "/" + "users.json", "utf8"); 
-    console.log(data);
-    res.end(data);        
+    try {
+        data = await readFileAsync( __dirname + "/" + "users.json", "utf8"); 
+        console.log(data);
+        res.end(data);    
+    } catch (error) {
+        console.error(error);
+        res.end(error.toString());
+    }
 });
 
 app.get('/:id', async (req, res) => {
-    data = await readFileAsync( __dirname + "/" + "users.json", "utf8"); 
-    users = JSON.parse( data );
-    var user = users["user" + req.params.id] 
-    console.log( user );
-    res.end( JSON.stringify(user));
+    try {
+        data = await readFileAsync( __dirname + "/" + "users.json", "utf8"); 
+        users = JSON.parse( data );
+        var user = users["user" + req.params.id] 
+        console.log( user );
+        res.end( JSON.stringify(user));    
+    } catch (error) {
+        console.error(error);
+        res.end(error.toString());
+    }    
 });
 
 var server = app.listen( 8081, async () => {
